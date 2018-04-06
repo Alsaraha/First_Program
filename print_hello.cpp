@@ -1,26 +1,62 @@
 #include <iostream>
-#include <sys/ioctl.h>
-#include <stdio.h>
 #include <unistd.h>
-int check(int x, int y) {
-	if (x%4 == 0 && y%4 == 0 || )
-	   )
+#include <math.h>
+#ifdef __linux__
+#include <sys/ioctl.h>
+#elif _WIN32
+#include <windows.h>
+#endif
+int a[] = { 0b000000000000000000000000000000,
+	    0b111111111100001111111111110000,
+	    0b111111111100001111111111110000,
+	    0b000001111100001111000011110000,
+	    0b111111111100001111000011110000,
+	    0b111111111100001111000011110000,
+	    0b111111111100001111000011110000,
+	    0b000001111100001111000011110000,
+	    0b000001111100001111000011110000,
+	    0b000001111100001111000011110000,
+	    0b000001111100001111000011110000,
+	    0b000001111100001111111111110000,
+	    0b000001111100001111111111110000,
+	    0b000000000000000000000000000000 };
+
+int check(int x, int y, int x_max, int y_max) {
+  if (x == 0 || y == 0 ||
+      x == x_max-1 || y == y_max-1) {
+    return 1;
+  } else if (a[y] & int(pow(2,x)) ) {
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 int main() {
-	#ifdef __linux__
-	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-
-	int input = 0;
-	
-	for (int i = 0; i < w.ws_col; i++) {
-		for (int j = 0; j < w.ws_row; j++) {
-		}
-	}
-	#endif
-	// std::cout << "please w.ws_row enter a number: " << w.ws_row;
-	// std::cin >> input;
-	// std::cout << "hello world. Your input was: "
-	//	<< input << std::endl;
+#ifdef __linux__
+  struct winsize w;
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+  const int width = w.ws_col;
+  const int height = w.ws_row-1;
+#elif _WIN32
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+  int width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+  int height = csbi.srWindow.Bottom - csbi.srWindow.Top;
+#endif
+  int input = 0;
+  for (int j = 0; j < height; j++) {
+    for (int i = 0; i < width; i++) {
+      if (check(i, j, width, height)) {
+	std::cout << "-";
+      } else {
+	std::cout << " ";
+      }
+    }
+    std::cout << std::endl;
+  }
+  // std::cout << "please w.ws_row enter a number: " << w.ws_row;
+  // std::cin >> input;
+  // std::cout << "hello world. Your input was: "
+  //	<< input << std::endl;
 }
